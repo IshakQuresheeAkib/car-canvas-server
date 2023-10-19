@@ -81,6 +81,25 @@ async function run() {
             res.send(carts);
         })
 
+        app.patch('/carts',async(req,res)=>{
+            const product = req.body;
+            console.log(product);
+            const filter = {_id: product._id}
+            const options = {upsert:true}
+            const updatedProduct = {
+                $set:{
+                    name : product.name ,
+                    brandName : product.brandName,
+                    image : product.image ,
+                    type : product.type ,
+                    price : product.price ,
+                    rating : product.rating ,
+                }
+            }
+            const result = await cartsCollection.updateOne(filter,updatedProduct,options)
+            res.send(result)
+        })
+
         app.get('/carts',async(req,res)=>{
             const result = await cartsCollection.find().toArray();
             res.send(result)
