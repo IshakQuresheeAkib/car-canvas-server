@@ -45,6 +45,13 @@ async function run() {
 
         })
 
+        app.get('/products/update/:id',async (req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const product = await productsCollection.findOne(query);
+            res.send(product)
+        })
+
         app.get('/product/:id',async (req,res)=>{
             const id = req.params.id;
             const query = {_id: new ObjectId(id)};
@@ -61,6 +68,24 @@ async function run() {
             res.send(carts);
         })
 
+        app.get('/carts',async(req,res)=>{
+            const result = await cartsCollection.find().toArray();
+            res.send(result)
+        })
+
+        app.delete('/carts/:id',async(req,res)=>{
+            const id = req.params.id;
+            console.log(id);
+            const query = {_id: id}
+            const result = await cartsCollection.deleteOne(query)
+            res.send(result)
+            if (result.deletedCount === 1) {
+                console.log("Successfully deleted one document.");
+              } else {
+                console.log("No documents matched the query. Deleted 0 documents.");
+              }
+        })
+
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     }finally {}
 }
@@ -70,8 +95,6 @@ run().catch(console.dir);
 app.get('/',(req,res)=>{
     res.send('SERVER IS RUNNING APPROPRIATELY!')
 })
-
-
 
 app.listen(port,()=>{
     console.log('Running on port:',port);
