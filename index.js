@@ -25,12 +25,6 @@ async function run() {
         const cartsCollection = client.db('productDB').collection('carts')
         
 
-        app.get('/products',async(req,res)=>{
-            const cursor = productsCollection.find();
-            const products = await cursor.toArray();
-            res.send(products)
-        })
-
         app.post('/products',async (req,res)=>{
             const product = req.body;
             const result = await productsCollection.insertOne(product)
