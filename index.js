@@ -81,7 +81,7 @@ async function run() {
             res.send(carts);
         })
 
-        app.patch('/carts',async(req,res)=>{
+        app.put('/carts',async(req,res)=>{
             const product = req.body;
             console.log(product);
             const filter = {_id: product._id}
