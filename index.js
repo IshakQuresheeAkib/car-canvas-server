@@ -20,7 +20,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-
         const productsCollection = client.db('productDB').collection('products')
         const cartsCollection = client.db('productDB').collection('carts')
         
@@ -52,8 +51,10 @@ async function run() {
 
         app.get('/products/:brands',async (req,res)=>{
             const brands = req.params.brands;
+            console.log(brands);
             const query = {brandName: brands }
             const products = await productsCollection.find(query).toArray();
+            console.log(products);
             res.send(products);
 
         })
@@ -63,7 +64,7 @@ async function run() {
             const query = {_id: new ObjectId(id)}
             const product = await productsCollection.findOne(query);
             res.send(product)
-        })
+        })       
 
         app.get('/product/:id',async (req,res)=>{
             const id = req.params.id;
@@ -75,35 +76,48 @@ async function run() {
               }
         })
 
-        app.post('/carts',async (req,res)=>{
-            const product = req.body;
-            const carts = await cartsCollection.insertOne(product)
-            res.send(carts);
-        })
 
-        app.put('/carts',async(req,res)=>{
-            const product = req.body;
-            console.log(product);
-            const filter = {_id: product._id}
-            const options = {upsert:true}
-            const updatedProduct = {
-                $set:{
-                    name : product.name ,
-                    brandName : product.brandName,
-                    image : product.image ,
-                    type : product.type ,
-                    price : product.price ,
-                    rating : product.rating ,
-                }
-            }
-            const result = await cartsCollection.updateOne(filter,updatedProduct,options)
-            res.send(result)
-        })
-
+        
         app.get('/carts',async(req,res)=>{
             const result = await cartsCollection.find().toArray();
             res.send(result)
+        })       
+
+
+        app.post('/carts',async (req,res)=>{
+            const product = req.body;
+            const result = await cartsCollection.findOne({_id: product._id})
+            console.log(result);
+            if (result) {
+                res.status(400).json();
+            }else{
+                const productDetails = await cartsCollection.insertOne(product)
+                res.send(productDetails);
+            }                        
         })
+
+           
+        app.patch('/carts',async(req,res)=>{
+            const product = req.body;
+                const result = await cartsCollection.findOne({_id: product._id})
+                if (result) {
+                    const filter = {_id: product._id}
+                    const options = {upsert:true}
+                    const updatedProduct = {
+                        $set:{
+                            name : product.name ,
+                            brandName : product.brandName,
+                            image : product.image ,
+                            type : product.type ,
+                            price : product.price ,
+                            rating : product.rating ,
+                        }
+                    }
+                    const result = await cartsCollection.updateOne(filter,updatedProduct,options)
+                    res.send(result)                    
+                }            
+        })
+
 
         app.delete('/carts/:id',async(req,res)=>{
             const id = req.params.id;
@@ -114,7 +128,8 @@ async function run() {
         })
 
         console.log("Pinged your deployment.You successfully connected to MongoDb!");
-    }finally {}
+    }
+    finally {}
 }
 run().catch(console.dir);
 
